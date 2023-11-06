@@ -1,0 +1,7 @@
+{
+  "python.defaultInterpreterPath": "python3",
+  "python.analysis.extraPaths": [
+    "/home/glue_user/.local/lib/python3.10/site-packages",
+    "./libs"
+  ]
+}
