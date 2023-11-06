@@ -1,5 +1,4 @@
 import base64
-import hashlib
 import boto3
 from Crypto import Random
 from Crypto.Cipher import AES
