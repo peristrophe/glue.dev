@@ -22,14 +22,14 @@ def decrypt_data_key(cipher_text_blob: str) -> str:
     return base64.b64encode(response["Plaintext"]).decode("utf-8")
 
 def encrypt(plain_text: str, key: str) -> str:
-    _key = hashlib.md5(key.encode("utf-8")).hexdigest().encode("utf-8")
+    _key = base64.b64decode(key)
     iv = Random.get_random_bytes(AES.block_size)
     cipher = AES.new(_key, AES.MODE_CBC, iv)
     data = Padding.pad(plain_text.encode("utf-8"), AES.block_size, "pkcs7")
     return base64.b64encode(iv + cipher.encrypt(data)).decode("utf-8")
 
 def decrypt(encrypted_text: str, key: str) -> str:
-    _key = hashlib.md5(key.encode("utf-8")).hexdigest().encode("utf-8")
+    _key = base64.b64decode(key)
     encrypted_text = base64.b64decode(encrypted_text)
     iv = encrypted_text[:AES.block_size]
     cipher = AES.new(_key, AES.MODE_CBC, iv)
