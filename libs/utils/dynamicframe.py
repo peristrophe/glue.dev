@@ -38,34 +38,28 @@ class DynamicFrameReaderWriter(JDBCConnectionContainer):
                            table: str,
                            *,
                            overwrite: bool = False,
+                           keep_schema: bool = False,
                            ) -> None:
-        if overwrite:
-            if isinstance(dataframe, DynamicFrame):
-                dataframe = dataframe.toDF()
-            elif isinstance(dataframe, DataFrame):
-                pass
-            else:
-                raise TypeError(f"Invalid type given dataframe: {dataframe}")
-            dataframe.write\
-                .format("jdbc")\
-                .option("url", self.jdbc_url_with_db(database))\
-                .option("dbtable", table)\
-                .option("user", self.jdbc_user)\
-                .option("password", self.jdbc_password)\
-                .mode("overwrite")\
-                .save()
+        if isinstance(dataframe, DynamicFrame):
+            dataframe = dataframe.toDF()
+        elif isinstance(dataframe, DataFrame):
+            pass
         else:
-            if isinstance(dataframe, DataFrame):
-                write_dyf = DynamicFrame.fromDF(dataframe, self.glue_context, f"{database}.{table}")
-            elif isinstance(dataframe, DynamicFrame):
-                write_dyf = dataframe
-            else:
-                raise TypeError(f"Invalid type given dataframe: {dataframe}")
-            self.glue_context.write_dynamic_frame.from_jdbc_conf(
-                frame=write_dyf,
-                catalog_connection=self.connection["Connection"]["Name"],
-                connection_options={
-                    "dbtable": table,
-                    "database": database,
-                }
-            )
+            raise TypeError(f"Invalid type given dataframe: {dataframe}")
+
+        writer = dataframe.write\
+            .format("jdbc")\
+            .option("url", self.jdbc_url_with_db(database))\
+            .option("dbtable", table)\
+            .option("user", self.jdbc_user)\
+            .option("password", self.jdbc_password)
+
+        if keep_schema:
+            writer = writer.option("truncate", "true")
+
+        if overwrite:
+            writer = writer.mode("overwrite")
+        else:
+            writer = writer.mode("append")
+
+        writer.save()

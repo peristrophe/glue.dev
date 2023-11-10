@@ -8,7 +8,7 @@ class MySQLCommunicator(JDBCConnectionContainer):
     def __init__(self, jdbc_connection_name: str):
         super().__init__(jdbc_connection_name)
 
-    def query(self, sql: str, params: Sequence, db_name: str) -> tuple[dict[str, Any]]:
+    def query(self, db_name: str, sql: str, *, params: Sequence = []) -> tuple[dict[str, Any]]:
         conn = pymysql.connect(
             host=self.jdbc_hostname,
             user=self.jdbc_user,
